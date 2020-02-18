@@ -1,8 +1,8 @@
-function state = present_image(program, conf)
+function state = present_target(program, conf)
 
 state = ptb.State();
-state.Name = 'present_image';
-state.Duration = conf.TIMINGS.time_in.present_image;
+state.Name = 'present_target';
+state.Duration = conf.TIMINGS.time_in.present_target;
 state.UserData = struct();
 
 state.Entry = @(state) entry(state, program);
@@ -13,29 +13,28 @@ end
 
 function entry(state, program)
 
-% At the start of the state, mark that fixation to the image was not yet
+% At the start of the state, mark that fixation to the spot was not yet
 % acquired; reset the fixation target, such that it has a cumuluative
-% looking time of 0s; and draw the image associated with the target.
+% looking time of 0s; and draw the fix associated with the target.
 %
 % Additionally, if we're in debug mode, draw the target bounds.
 
 state.UserData.acquired_fixation = false;
 
-image_obj = program.Value.stimuli.img1;
-target_obj = program.Value.targets.img1;
+target_obj = program.Value.targets.target1;
 reset( target_obj );
 
-images = program.Value.images;
+targets = program.Value.targets;
 window = program.Value.window;
 
-if ( ~isempty(images) )
+if ( ~isempty(targets) )
   % Display a random image.
-  image_n = randi( numel(images), 1 );
-  image = images{image_n};
+  target_n = randi( numel(targets), 1 );
+  target = targets{target_n};
   
-  image_obj.FaceColor = image;
+  target_obj.targetField = target;
   
-  draw( image_obj, window );
+  draw( target_obj, window );
 end
 
 if ( program.Value.is_debug )
@@ -48,7 +47,7 @@ end
 
 function loop(state, program)
 
-target_obj = program.Value.targets.img1;
+target_obj = program.Value.targets.target1;
 
 if ( target_obj.IsDurationMet )
   % Mark that we successfully acquired fixation.
@@ -64,9 +63,9 @@ function exit(state, program)
 states = program.Value.states;
 
 if ( state.UserData.acquired_fixation )
-  next( state, states('image_success') );
+  next( state, states('fix_success') );
 else
-  next( state, states('image_error') );
+  next( state, states('fix_error') );
 end
 
 end

@@ -2,8 +2,11 @@ Screen( 'Preference', 'VisualDebuglevel', 0 );
 
 conf = fix.config.reconcile( fix.config.load() );
 
-conf.TIMINGS.time_in.fixation = 10;
+conf.TIMINGS.time_in.fixation = 1;
 conf.TIMINGS.time_in.juice_reward = 1;
+conf.TIMINGS.time_in.present_target = 1;
+conf.TIMINGS.time_in.fix_success = 1;
+conf.TIMINGS.time_in.fix_error = 1;
 
 conf.META.subject = 'Lynch';
 

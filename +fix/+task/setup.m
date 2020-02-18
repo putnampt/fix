@@ -131,9 +131,9 @@ function make_states(program, conf)
 % Create and store references to each state object.
 states = containers.Map();
 states('new_trial') = fix.task.states.new_trial( program, conf );
-states('present_image') = fix.task.states.present_image( program, conf );
-states('image_success') = fix.task.states.image_success( program, conf );
-states('image_error') = fix.task.states.image_error( program, conf );
+states('present_target') = fix.task.states.present_target( program, conf );
+states('fix_success') = fix.task.states.fix_success( program, conf );
+states('fix_error') = fix.task.states.fix_error( program, conf );
 
 program.Value.states = states;
 

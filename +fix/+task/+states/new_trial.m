@@ -20,7 +20,7 @@ end
 function exit(state, program)
 
 states = program.Value.states;
-% When `new_trial` is finished, go to the `present_image` state
-next( state, states('present_image') );
+% When `new_trial` is finished, go to the `present_target` state
+next( state, states('present_target') );
 
 end
