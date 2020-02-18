@@ -76,7 +76,7 @@ xy_sampler = updater.create_registered( @ptb.samplers.Pass, xy_source );
 
 end
 
-function make_targets(program, window, updater, sampler, stimuli, stim_setup)
+function make_targets(program, window, updater, sampler, targets, stim_setup)
 
 stim_names = fieldnames( stim_setup );
 named_targets = struct();
@@ -90,13 +90,13 @@ for i = 1:numel(stim_names)
     continue;
   end
   
-  stim = stimuli.(stim_name);
+  stim = targets.(stim_name);
   stim_class = class( stim );
 
   bounds = [];
 
   switch ( stim_class )
-    case 'ptb.stimuli.Rect'
+    case 'ptb.targets.Rect'
       bounds = ptb.bounds.Rect();
       bounds.BaseRect = ptb.rects.MatchRectangle( stim );       
 
@@ -164,23 +164,6 @@ program.Value.window = window;
 
 end
 
-function image_objects = make_images(program, window, conf)
-
-image_dir = fullfile( stimuli_path(conf), 'images' );
-image_files = shared_utils.io.find( image_dir, {'.jpg', '.png'} );
-image_matrices = cellfun( @imread, image_files, 'un', 0 );
-
-if ( window.is_window_handle_valid() )
-  image_objects = cellfun( @(x) ptb.Image(window, x), image_matrices, 'un', 0 );
-else
-  % dummy images.
-  image_objects = cellfun( @(x) ptb.Image(), image_matrices, 'un', 0 );
-end
-
-program.Value.images = image_objects;
-
-end
-
 function [out_stimuli, stim_setup] = make_stimuli(program, window, conf)
 
 % Make a visual stimulus for each field of `STIMULI.setup`, as defined in
@@ -233,9 +216,6 @@ program.Value.stimuli = out_stimuli;
 end
 
 
-function p = stimuli_path(conf)
-p = conf.PATHS.stimuli;
-end
 
 function stim = get_stimuli(conf)
 stim = conf.STIMULI;
