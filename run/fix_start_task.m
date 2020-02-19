@@ -17,9 +17,8 @@ conf.INTERFACE.reward_output_type = 'ni';
 % conf.INTERFACE.reward_output_type = 'none'; 
 conf.INTERFACE.skip_sync_tests = true;
 
-conf.DEBUG_SCREEN.is_present = true;
-conf.DEBUG_SCREEN.index = 0;
-conf.DEBUG_SCREEN.background_color = [ 0 0 0 ];
-conf.DEBUG_SCREEN.rect = [ 1600, 0, 1600 + 1280, 1024 ];
+conf.SCREEN.index = 0;
+conf.SCREEN.rect = [1600, 0, 1600+1024, 768];
+conf.SCREEN.calibration_rect = conf.SCREEN.rect;
 
 fix.task.start( conf );

@@ -6,7 +6,7 @@ else
   fix.util.assertions.assert__is_config( conf );
 end
 
-conf = fix.config.reconcile( conf );
+conf =  fix.config.reconcile( conf );
 program = make_program( conf );
 
 try
@@ -27,9 +27,16 @@ make_states( program, conf );
 window = make_window( program, conf );
 updater = make_updater( program );
 
+ni_session = make_ni_daq_session( program, conf );
+ni_scan_input = make_ni_scan_input( program, conf, ni_session );
+ni_scan_output = make_ni_scan_output( program, conf, ni_session );
+make_reward_manager( program, conf, ni_scan_output )
+
 [stimuli, stim_setup] = make_stimuli( program, window, conf );
 
-sampler = make_sources( program, updater, window, conf );
+tracker = make_eye_tracker( program, updater, ni_scan_input, conf );
+sampler = make_gaze_sampler( program, updater, tracker, conf );
+
 make_targets( program, window, updater, sampler, stimuli, stim_setup );
 
 end
@@ -63,16 +70,47 @@ program.Value.task = task;
 
 end
 
-function xy_sampler = make_sources(program, updater, window, conf)
+function tracker = make_eye_tracker(program, updater, ni_scan_input, conf)
 
-source_inputs = {};
+interface = get_interface( conf );
+source_type = interface.gaze_source_type;
 
-if ( window.is_window_handle_valid() )
-  source_inputs{end+1} = window;
+switch ( source_type )
+  case 'mouse'
+    tracker = ptb.sources.Mouse();
+  case 'digital_eyelink'
+    tracker = ptb.sources.Eyelink();
+    initialize( tracker );
+    start_recording( tracker );
+  case 'analog_input'
+    tracker = make_analog_input_tracker( ni_scan_input, conf );
+  otherwise
+    error( 'Unrecognized source type "%s".', source_type );
 end
 
-xy_source = updater.create_registered( @ptb.sources.Mouse, source_inputs{:} );
-xy_sampler = updater.create_registered( @ptb.samplers.Pass, xy_source );
+updater.add_component( tracker );
+program.Value.tracker = tracker;
+
+end
+
+function tracker = make_analog_input_tracker(ni_scan_input, conf)
+
+tracker = ptb.sources.XYAnalogInput( ni_scan_input );
+tracker.CalibrationRect = conf.SCREEN.calibration_rect;
+tracker.OutputVoltageRange = [-5, 5];
+tracker.CalibrationRectPaddingFract = [0.2, 0.2];
+tracker.ChannelMapping = [1, 2];
+
+end
+
+function sampler = make_gaze_sampler(program, updater, tracker, conf)
+
+sampler = ptb.samplers.Pass();
+sampler.Source = tracker;
+
+updater.add_component( sampler );
+
+program.Value.sampler = sampler;
 
 end
 
@@ -96,7 +134,7 @@ for i = 1:numel(stim_names)
   bounds = [];
 
   switch ( stim_class )
-    case 'ptb.targets.Rect'
+    case 'ptb.stimuli.Rect'
       bounds = ptb.bounds.Rect();
       bounds.BaseRect = ptb.rects.MatchRectangle( stim );       
 
@@ -169,7 +207,6 @@ function [out_stimuli, stim_setup] = make_stimuli(program, window, conf)
 % Make a visual stimulus for each field of `STIMULI.setup`, as defined in
 % the config file `conf`. `conf` is created in `fix.config.create`, 
 % and defines the default property values for each stimulus.
-make_images( program, window, conf );
 
 stimuli = get_stimuli( conf );
 stim_setup = stimuli.setup;
@@ -215,7 +252,75 @@ program.Value.stimuli = out_stimuli;
 
 end
 
+function ni_session = make_ni_daq_session(program, conf)
 
+signal = get_signal( conf );
+
+ni_session = daq.createSession( 'ni' );
+ni_device_id = pct.util.get_ni_daq_device_id();
+
+m1_channel_x = signal.analog_channel_m1x;
+m1_channel_y = signal.analog_channel_m1y;
+
+channels = { m1_channel_x, m1_channel_y };
+
+for i = 1:numel(channels)
+  addAnalogInputChannel( ni_session, ni_device_id, channels{i}, 'Voltage' );
+end
+
+addAnalogOutputChannel( ni_session, ni_device_id, 0, 'Voltage' );
+
+program.Value.ni_session = ni_session;
+program.Value.ni_device_id = ni_device_id;
+
+end
+
+function ni_scan_input = make_ni_scan_input(program, conf, ni_session)
+
+ni_scan_input = [];
+if ( isempty(ni_session) )
+  program.Value.ni_scan_input = [];
+  return
+end
+
+ni_scan_input = ptb.signal.SingleScanInput( ni_session );
+program.Value.ni_scan_input = ni_scan_input;
+
+end
+
+function ni_scan_output = make_ni_scan_output(program, conf, ni_session)
+
+ni_scan_output = [];
+if ( isempty(ni_session) )
+  program.Value.ni_scan_output = [];
+  return
+end
+
+ni_scan_output = ptb.signal.SingleScanOutput( ni_session );
+program.Value.ni_scan_output = ni_scan_output;
+
+end
+
+function make_reward_manager(program, conf, ni_scan_output)
+
+rewards = get_rewards( conf );
+signal = get_signal( conf );
+
+channel_index = signal.primary_reward_channel_index;
+reward_manager = ptb.signal.SingleScanOutputPulseManager( ni_scan_output, channel_index );
+
+program.Value.ni_reward_manager = reward_manager;
+program.Value.rewards = rewards;
+
+end
+
+function rewards = get_rewards(conf)
+rewards = conf.REWARDS;
+end
+
+function signal = get_signal(conf)
+signal = conf.SIGNAL;
+end
 
 function stim = get_stimuli(conf)
 stim = conf.STIMULI;

@@ -21,21 +21,12 @@ function entry(state, program)
 
 state.UserData.acquired_fixation = false;
 
-target_obj = program.Value.targets.target1;
-reset( target_obj );
-
-targets = program.Value.targets;
+target_obj = program.Value.targets.img1;
+stimulus = program.Value.stimuli.img1;
 window = program.Value.window;
 
-if ( ~isempty(targets) )
-  % Display a random image.
-  target_n = randi( numel(targets), 1 );
-  target = targets{target_n};
-  
-  target_obj.targetField = target;
-  
-  draw( target_obj, window );
-end
+reset( target_obj );
+draw( stimulus, window );
 
 if ( program.Value.is_debug )
   draw( target_obj.Bounds, window );
@@ -47,7 +38,7 @@ end
 
 function loop(state, program)
 
-target_obj = program.Value.targets.target1;
+target_obj = program.Value.targets.img1;
 
 if ( target_obj.IsDurationMet )
   % Mark that we successfully acquired fixation.

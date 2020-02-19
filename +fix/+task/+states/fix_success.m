@@ -21,6 +21,8 @@ success_img = program.Value.stimuli.success_img;
 draw( success_img, window );
 flip( window );
 
+trigger( program.Value.ni_reward_manager, program.Value.rewards.main );
+
 end
 
 function loop(state, program)

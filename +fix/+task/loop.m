@@ -17,4 +17,22 @@ update( program.Value.frame_timer );
 % time spent in bounds of each target.
 update( program.Value.updater );
 
+handle_ni_daq_update( program );
+
+end
+
+function handle_ni_daq_update(program)
+
+if ( ~isempty(program.Value.ni_reward_manager) )
+  update( program.Value.ni_reward_manager );
+end
+
+if ( ~isempty(program.Value.ni_scan_output) )
+  update( program.Value.ni_scan_output );
+end
+
+if ( ~isempty(program.Value.ni_scan_input) )
+  update( program.Value.ni_scan_input );
+end
+
 end

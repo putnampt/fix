@@ -30,6 +30,8 @@ INTERFACE.use_mouse = true;
 INTERFACE.open_window = true;
 INTERFACE.skip_sync_tests = false;
 INTERFACE.is_debug = true;
+INTERFACE.use_debug_window = false;
+INTERFACE.gaze_source_type = 'mouse';
 
 %	SCREEN
 SCREEN = struct();
@@ -38,6 +40,9 @@ SCREEN.full_size = get( 0, 'screensize' );
 SCREEN.index = 0;
 SCREEN.background_color = [ 0 0 0 ];
 SCREEN.rect = [ 0, 0, 400, 400 ];
+SCREEN.debug_index = 1;
+SCREEN.debug_rect = [0, 0, 400, 400];
+SCREEN.calibration_rect = [0, 0, 400, 400];
 
 %	TIMINGS
 TIMINGS = struct();
@@ -59,6 +64,7 @@ STIMULI.setup.img1 = struct( ...
     'class',            'Rect' ...
   , 'position',         ptb.WindowDependent( 0.5, 'normalized' ) ...
   , 'size',             ptb.WindowDependent( 100, 'px' ) ...
+  , 'color',            set( ptb.Color(), [0, 255, 255] ) ...
   , 'has_target',       true ...
   , 'padding',          ptb.WindowDependent( 50, 'px' ) ...
   , 'target_duration',  0.3 ...
@@ -80,6 +86,16 @@ STIMULI.setup.error_img = struct( ...
   , 'color',      set( ptb.Color(), [0, 0, 255] ) ...
 );
 
+% SIGNAL
+SIGNAL = struct();
+SIGNAL.analog_channel_m1x = 'ai0';
+SIGNAL.analog_channel_m1y = 'ai1';
+SIGNAL.primary_reward_channel_index = 1;
+
+% REWARDS
+REWARDS = struct();
+REWARDS.main = 0.3;
+
 % EXPORT
 conf.PATHS = PATHS;
 conf.DEPENDS = DEPENDS;
@@ -87,6 +103,8 @@ conf.TIMINGS = TIMINGS;
 conf.STIMULI = STIMULI;
 conf.SCREEN = SCREEN;
 conf.INTERFACE = INTERFACE;
+conf.SIGNAL = SIGNAL;
+conf.REWARDS = REWARDS;
 
 if ( do_save )
   fix.config.save( conf );
