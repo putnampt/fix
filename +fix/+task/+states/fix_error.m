@@ -37,6 +37,6 @@ end
 function exit(state, program)
 
 states = program.Value.states;
-next( state, states('new_trial') );
+next( state, states('iti') );
 
 end
