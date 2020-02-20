@@ -24,7 +24,7 @@ function make_all(program, conf)
 make_task( program, conf );
 make_states( program, conf );
 
-window = make_window( program, conf );
+[window, debug_window] = make_windows( program, conf );
 updater = make_updater( program );
 
 ni_session = make_ni_daq_session( program, conf );
@@ -38,6 +38,14 @@ tracker = make_eye_tracker( program, updater, ni_scan_input, conf );
 sampler = make_gaze_sampler( program, updater, tracker, conf );
 
 make_targets( program, window, updater, sampler, stimuli, stim_setup );
+
+attach_interface( program, conf );
+
+end
+
+function attach_interface(program, conf)
+
+program.Value.interface = get_interface( conf );
 
 end
 
@@ -147,7 +155,11 @@ for i = 1:numel(stim_names)
   end
   
   if ( isfield(stim_descr, 'padding') )
-    bounds.Padding = as_px( stim_descr.padding, window );
+    if ( ~isa(stim_descr.padding, 'ptb.WindowDependent') )
+      bounds.Padding = stim_descr.padding;
+    else
+      bounds.Padding = as_px( stim_descr.padding, window );
+    end
   end
 
   targ = updater.create_registered( @ptb.XYTarget );
@@ -172,6 +184,7 @@ states('new_trial') = fix.task.states.new_trial( program, conf );
 states('present_target') = fix.task.states.present_target( program, conf );
 states('fix_success') = fix.task.states.fix_success( program, conf );
 states('fix_error') = fix.task.states.fix_error( program, conf );
+states('iti') = fix.task.states.iti( program, conf );
 
 program.Value.states = states;
 
@@ -184,7 +197,7 @@ program.Value.updater = updater;
 
 end
 
-function window = make_window(program, conf)
+function [window, debug_window] = make_windows(program, conf)
 
 window = ptb.Window();
 screen_info = get_screen( conf );
@@ -194,11 +207,25 @@ window.Rect = screen_info.rect;
 window.Index = screen_info.index;
 window.SkipSyncTests = interface.skip_sync_tests;
 
+if ( interface.use_debug_window )
+  debug_window = ptb.Window();
+  debug_window.Rect = screen_info.debug_rect;
+  debug_window.Index = screen_info.debug_index;
+  debug_window.SkipSyncTests = interface.skip_sync_tests;
+else
+  debug_window = [];
+end
+
 if ( interface.open_window )
   open( window );
 end
 
+if ( interface.use_debug_window )
+  open( debug_window );
+end
+
 program.Value.window = window;
+program.Value.debug_window = debug_window;
 
 end
 
@@ -249,6 +276,7 @@ for i = 1:numel(stim_names)
 end
 
 program.Value.stimuli = out_stimuli;
+program.Value.stimuli_setup = stim_setup;
 
 end
 

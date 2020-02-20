@@ -1,9 +1,10 @@
-function state = fix_error(program, conf)
+function state = iti(program, conf)
 
 state = ptb.State();
-state.Name = 'image_error';
-% Remain in this state for at most `image_error` seconds.
-state.Duration = conf.TIMINGS.time_in.image_error;
+state.Name = 'iti';
+% Remain in this state for at most `image_success` seconds. In this case,
+% this is equivalent to specifying how long the stimulus will be shown.
+state.Duration = conf.TIMINGS.time_in.image_success;
 
 state.Entry = @(state) entry(state, program);
 state.Loop = @(state) loop(state, program);
@@ -14,10 +15,6 @@ end
 function entry(state, program)
 
 window = program.Value.window;
-% Draw the stimulus associated with failing to fixate.
-error_img = program.Value.stimuli.error_img;
-
-draw( error_img, window );
 flip( window );
 
 end
@@ -26,9 +23,6 @@ function loop(state, program)
 
 [should_flip, debug_window] = fix.util.draw_gaze_cursor_from_program( program );
 if ( should_flip )
-  error_img = program.Value.stimuli.error_img;
-  draw( error_img, debug_window );
-  
   flip( debug_window );
 end
 

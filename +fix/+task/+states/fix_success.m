@@ -1,7 +1,7 @@
-function state = image_success(program, conf)
+function state = fix_success(program, conf)
 
 state = ptb.State();
-state.Name = 'image_success';
+state.Name = 'fix_success';
 % Remain in this state for at most `image_success` seconds. In this case,
 % this is equivalent to specifying how long the stimulus will be shown.
 state.Duration = conf.TIMINGS.time_in.image_success;
@@ -27,11 +27,19 @@ end
 
 function loop(state, program)
 
+[should_flip, debug_window] = fix.util.draw_gaze_cursor_from_program( program );
+if ( should_flip )
+  success_img = program.Value.stimuli.success_img;
+  draw( success_img, debug_window );
+  
+  flip( debug_window );
+end
+
 end
 
 function exit(state, program)
 
 states = program.Value.states;
-next( state, states('new_trial') );
+next( state, states('iti') );
 
 end
