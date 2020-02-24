@@ -1,7 +1,9 @@
-function [outputArg1,outputArg2] = encode(inputArg1,inputArg2)
+function [success] = encode(program, pulse_int)
 %ENCODE Summary of this function goes here
 %   Detailed explanation goes here
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
+success = true;
+
+
+
 end
 
