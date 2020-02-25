@@ -30,7 +30,8 @@ updater = make_updater( program );
 ni_session = make_ni_daq_session( program, conf );
 ni_scan_input = make_ni_scan_input( program, conf, ni_session );
 ni_scan_output = make_ni_scan_output( program, conf, ni_session );
-make_reward_manager( program, conf, ni_scan_output )
+make_reward_manager( program, conf, ni_scan_output );
+make_encode_manager( program, conf, ni_scan_output );
 
 [stimuli, stim_setup] = make_stimuli( program, window, conf );
 
@@ -298,6 +299,9 @@ end
 
 addAnalogOutputChannel( ni_session, ni_device_id, 0, 'Voltage' );
 
+addDigitalChannel( ni_session, ni_device_id, 'Port0/Line0:7', 'OutputOnly' );
+addDigitalChannel( ni_session, ni_device_id, 'Port1/Line0:7', 'OutputOnly' );
+
 program.Value.ni_session = ni_session;
 program.Value.ni_device_id = ni_device_id;
 
@@ -339,6 +343,17 @@ reward_manager = ptb.signal.SingleScanOutputPulseManager( ni_scan_output, channe
 
 program.Value.ni_reward_manager = reward_manager;
 program.Value.rewards = rewards;
+
+end
+
+function make_encode_manager(program, conf, ni_scan_output)
+
+signal = get_signal( conf );
+
+channel_indices = signal.digitial_encode_channel_indices;
+encode_manager = ptb.signal.DigitalSingleScanOutputValue( ni_scan_output, channel_indices );
+
+program.Value.ni_digital_encode_manager = encode_manager;
 
 end
 

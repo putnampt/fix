@@ -101,6 +101,7 @@ SIGNAL = struct();
 SIGNAL.analog_channel_m1x = 'ai0';
 SIGNAL.analog_channel_m1y = 'ai1';
 SIGNAL.primary_reward_channel_index = 1;
+SIGNAL.digitial_encode_channel_indices = 2:17;
 
 % REWARDS
 REWARDS = struct();

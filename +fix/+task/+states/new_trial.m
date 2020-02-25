@@ -11,6 +11,15 @@ end
 
 function entry(state, program)
 % Nothing to do right now.
+
+encode_manager = program.Value.ni_digital_encode_manager;
+
+bits = zeros( 1, 16 );
+bits([1, 2]) = 1;
+bits(:) = 1;
+
+trigger( encode_manager, bits );
+
 end
 
 function loop(state, program)

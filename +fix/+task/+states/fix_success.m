@@ -31,6 +31,10 @@ function loop(state, program)
 if ( should_flip )
   success_img = program.Value.stimuli.success_img;
   draw( success_img, debug_window );
+  window = program.Value.window;
+    sampler = program.Value.sampler;
+    gaze_cursor = program.Value.stimuli.gaze_cursor;
+  fix.util.draw_gaze_cursor( sampler, gaze_cursor, window, debug_window );  
   
   flip( debug_window );
 end
@@ -38,6 +42,8 @@ end
 end
 
 function exit(state, program)
+
+% fix.util.encode(21);
 
 states = program.Value.states;
 next( state, states('iti') );
